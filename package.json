@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "clone-districts": "node ./src/cloneDistricts.mjs",
-    "clone-vdcs": "node ./src/cloneVDCs.mjs",
-    "clone-wards": "node ./src/cloneWards.mjs",
-    "clone-voting-centres": "node ./src/cloneVotingCentres.mjs",
-    "clone-voter-list": "node ./src/cloneVoterList.mjs",
-    "clone": "yarn clone-districts && yarn clone-vdcs && yarn clone-wards && yarn clone-voting-centres && yarn clone-voter-list"
+    "clone-districts": "bun ./src/cloneDistricts.mjs",
+    "clone-vdcs": "bun ./src/cloneVDCs.mjs",
+    "clone-wards": "bun ./src/cloneWards.mjs",
+    "clone-voting-centres": "bun ./src/cloneVotingCentres.mjs",
+    "clone-voter-list": "bun ./src/cloneVoterList.mjs",
+    "clone": "bun run clone-districts && bun run clone-vdcs && bun run clone-wards && bun run clone-voting-centres && bun run clone-voter-list"
   },
   "dependencies": {
     "got": "^12.0.4",
