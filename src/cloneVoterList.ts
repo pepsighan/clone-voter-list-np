@@ -1,13 +1,19 @@
-import fs from 'fs';
-import { fetchVoters } from './voters.mjs';
+import { fetchVoters } from "./voters";
 
-const content = fs.readFileSync('./data/votingCentres.json');
-const votingCentres = JSON.parse(content.toString());
+const votingCentres = await Bun.file("./data/votingCentres.json").json();
 
 let counter = 0;
-let allVoters = [];
-for (let vc of votingCentres) {
-  console.log('Fetch voters', vc.vdc, vc.centre);
+let allVoters: (typeof votingCentres[0] & {
+  voterId: string;
+  name: string;
+  age: string;
+  gender: string;
+  spouse: string;
+  parents: string;
+})[] = [];
+
+for (const vc of votingCentres) {
+  console.log("Fetch voters", vc.vdc, vc.centre);
 
   const voters = await fetchVoters({
     state: vc.state,
@@ -25,7 +31,7 @@ for (let vc of votingCentres) {
 
   // Flush all the voters once 10,000.
   if (allVoters.length >= 10000) {
-    fs.writeFileSync(
+    await Bun.write(
       `./data/voterList${counter}.json`,
       JSON.stringify(allVoters)
     );
@@ -35,4 +41,4 @@ for (let vc of votingCentres) {
 }
 
 // Flush any remaining voters.
-fs.writeFileSync(`./data/voterList${counter}.json`, JSON.stringify(allVoters));
+await Bun.write(`./data/voterList${counter}.json`, JSON.stringify(allVoters));

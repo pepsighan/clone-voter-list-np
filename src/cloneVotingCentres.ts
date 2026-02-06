@@ -1,12 +1,11 @@
-import fs from 'fs';
-import { fetchRegion, regionType } from './region.mjs';
+import { fetchRegion, regionType } from "./region";
 
-const content = fs.readFileSync('./data/wards.json');
-const wards = JSON.parse(content.toString());
+const wards = await Bun.file("./data/wards.json").json();
 
-const futures = [];
-for (let ward of wards) {
-  console.log('Fetch voting centres', ward.vdc, ward.ward);
+const futures: Promise<{ value: number; name: string }[]>[] = [];
+
+for (const ward of wards) {
+  console.log("Fetch voting centres", ward.vdc, ward.ward);
 
   futures.push(
     fetchRegion({
@@ -21,7 +20,8 @@ for (let ward of wards) {
 }
 
 const resolved = await Promise.all(futures);
-const allCentres = [];
+const allCentres: (typeof wards[0] & { centre: number; centreName: string })[] = [];
+
 resolved.forEach((centres, index) => {
   allCentres.push(
     ...centres.map((it) => ({
@@ -32,4 +32,4 @@ resolved.forEach((centres, index) => {
   );
 });
 
-fs.writeFileSync('./data/votingCentres.json', JSON.stringify(allCentres));
+await Bun.write("./data/votingCentres.json", JSON.stringify(allCentres));

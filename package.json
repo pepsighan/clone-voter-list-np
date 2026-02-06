@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "clone-districts": "bun ./src/cloneDistricts.mjs",
-    "clone-vdcs": "bun ./src/cloneVDCs.mjs",
-    "clone-wards": "bun ./src/cloneWards.mjs",
-    "clone-voting-centres": "bun ./src/cloneVotingCentres.mjs",
-    "clone-voter-list": "bun ./src/cloneVoterList.mjs",
+    "clone-districts": "bun ./src/cloneDistricts.ts",
+    "clone-vdcs": "bun ./src/cloneVDCs.ts",
+    "clone-wards": "bun ./src/cloneWards.ts",
+    "clone-voting-centres": "bun ./src/cloneVotingCentres.ts",
+    "clone-voter-list": "bun ./src/cloneVoterList.ts",
     "clone": "bun run clone-districts && bun run clone-vdcs && bun run clone-wards && bun run clone-voting-centres && bun run clone-voter-list"
   },
   "dependencies": {
-    "got": "^12.0.4",
     "jsdom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7"
   }
 }

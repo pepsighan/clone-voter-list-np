@@ -1,7 +1,6 @@
-import fs from 'fs';
-import { fetchRegion, regionType } from './region.mjs';
+import { fetchRegion, regionType } from "./region";
 
-const allDistricts = [];
+const allDistricts: { district: number; districtName: string; state: number }[] = [];
 
 for (let state = 1; state <= 7; state++) {
   const districts = await fetchRegion({
@@ -17,4 +16,4 @@ for (let state = 1; state <= 7; state++) {
   );
 }
 
-fs.writeFileSync('./data/districts.json', JSON.stringify(allDistricts));
+await Bun.write("./data/districts.json", JSON.stringify(allDistricts));
