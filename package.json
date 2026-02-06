@@ -2,6 +2,7 @@
   "name": "clone-voter-list-np",
   "version": "1.0.0",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "clone-districts": "bun ./src/cloneDistricts.ts",
     "clone-vdcs": "bun ./src/cloneVDCs.ts",
@@ -14,6 +15,10 @@
     "jsdom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/jsdom": "^21.1.7"
+    "@types/jsdom": "^21.1.7",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }
