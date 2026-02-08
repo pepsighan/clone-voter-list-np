@@ -1,19 +1,15 @@
+import { appendFileSync, writeFileSync } from "node:fs";
 import { fetchRegion, regionType } from "./region";
 
-const allDistricts: { district: number; districtName: string; state: number }[] = [];
+const file = "./data/districts.csv";
+writeFileSync(file, "state,district,districtName\n");
 
 for (let state = 1; state <= 7; state++) {
   const districts = await fetchRegion({
     state,
     list_type: regionType.district,
   });
-  allDistricts.push(
-    ...districts.map((it) => ({
-      district: it.value,
-      districtName: it.name,
-      state,
-    }))
-  );
+  for (const it of districts) {
+    appendFileSync(file, `${state},${it.value},${it.name}\n`);
+  }
 }
-
-await Bun.write("./data/districts.json", JSON.stringify(allDistricts));

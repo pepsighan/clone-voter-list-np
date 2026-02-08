@@ -1,23 +1,29 @@
+import { appendFileSync, writeFileSync } from "node:fs";
 import { fetchRegion, regionType } from "./region";
 
-const districts = await Bun.file("./data/districts.json").json();
+const districts = (await Bun.file("./data/districts.csv").text())
+  .trim()
+  .split("\n")
+  .slice(1)
+  .map((line) => {
+    const [state, district, districtName] = line.split(",");
+    return { state: state!, district: district!, districtName: districtName! };
+  });
 
-const allVDCs: (typeof districts[0] & { vdc: number; vdcName: string })[] = [];
+const file = "./data/vdcs.csv";
+writeFileSync(file, "state,district,districtName,vdc,vdcName\n");
 
 for (const dist of districts) {
-  console.log("Fetch districts", dist.district);
+  console.log("Fetch VDCs", dist.district);
 
   const vdcs = await fetchRegion({
-    district: dist.district,
+    district: Number(dist.district),
     list_type: regionType.vdc,
   });
-  allVDCs.push(
-    ...vdcs.map((it) => ({
-      ...dist,
-      vdc: it.value,
-      vdcName: it.name,
-    }))
-  );
+  for (const it of vdcs) {
+    appendFileSync(
+      file,
+      `${dist.state},${dist.district},${dist.districtName},${it.value},${it.name}\n`
+    );
+  }
 }
-
-await Bun.write("./data/vdcs.json", JSON.stringify(allVDCs));

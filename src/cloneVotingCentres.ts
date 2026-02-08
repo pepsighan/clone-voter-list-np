@@ -1,35 +1,40 @@
+import { appendFileSync, writeFileSync } from "node:fs";
 import { fetchRegion, regionType } from "./region";
 
-const wards = await Bun.file("./data/wards.json").json();
+const wards = (await Bun.file("./data/wards.csv").text())
+  .trim()
+  .split("\n")
+  .slice(1)
+  .map((line) => {
+    const [state, district, districtName, vdc, vdcName, ward] = line.split(",");
+    return {
+      state: state!,
+      district: district!,
+      districtName: districtName!,
+      vdc: vdc!,
+      vdcName: vdcName!,
+      ward: ward!,
+    };
+  });
 
-const futures: Promise<{ value: number; name: string }[]>[] = [];
+const file = "./data/votingCentres.csv";
+writeFileSync(
+  file,
+  "state,district,districtName,vdc,vdcName,ward,centre,centreName\n"
+);
 
 for (const ward of wards) {
   console.log("Fetch voting centres", ward.vdc, ward.ward);
 
-  futures.push(
-    fetchRegion({
-      vdc: ward.vdc,
-      ward: ward.ward,
-      list_type: regionType.regCentre,
-    })
-  );
-  if (futures.length % 5 === 0) {
-    await Promise.all(futures);
+  const centres = await fetchRegion({
+    vdc: Number(ward.vdc),
+    ward: Number(ward.ward),
+    list_type: regionType.regCentre,
+  });
+  for (const it of centres) {
+    appendFileSync(
+      file,
+      `${ward.state},${ward.district},${ward.districtName},${ward.vdc},${ward.vdcName},${ward.ward},${it.value},${it.name}\n`
+    );
   }
 }
-
-const resolved = await Promise.all(futures);
-const allCentres: (typeof wards[0] & { centre: number; centreName: string })[] = [];
-
-resolved.forEach((centres, index) => {
-  allCentres.push(
-    ...centres.map((it) => ({
-      ...wards[index],
-      centre: it.value,
-      centreName: it.name,
-    }))
-  );
-});
-
-await Bun.write("./data/votingCentres.json", JSON.stringify(allCentres));

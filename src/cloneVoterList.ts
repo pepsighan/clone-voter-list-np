@@ -1,44 +1,45 @@
+import { appendFileSync, writeFileSync } from "node:fs";
 import { fetchVoters } from "./voters";
 
-const votingCentres = await Bun.file("./data/votingCentres.json").json();
+const votingCentres = (await Bun.file("./data/votingCentres.csv").text())
+  .trim()
+  .split("\n")
+  .slice(1)
+  .map((line) => {
+    const [state, district, districtName, vdc, vdcName, ward, centre, centreName] =
+      line.split(",");
+    return {
+      state: state!,
+      district: district!,
+      districtName: districtName!,
+      vdc: vdc!,
+      vdcName: vdcName!,
+      ward: ward!,
+      centre: centre!,
+      centreName: centreName!,
+    };
+  });
 
-let counter = 0;
-let allVoters: (typeof votingCentres[0] & {
-  voterId: string;
-  name: string;
-  age: string;
-  gender: string;
-  spouse: string;
-  parents: string;
-})[] = [];
+const file = "./data/voterList.csv";
+writeFileSync(
+  file,
+  "state,district,districtName,vdc,vdcName,ward,centre,centreName,voterId,name,age,gender,spouse,parents\n"
+);
 
 for (const vc of votingCentres) {
   console.log("Fetch voters", vc.vdc, vc.centre);
 
   const voters = await fetchVoters({
-    state: vc.state,
-    district: vc.district,
-    vdc: vc.vdc,
-    ward: vc.ward,
-    regCentre: vc.centre,
+    state: Number(vc.state),
+    district: Number(vc.district),
+    vdc: Number(vc.vdc),
+    ward: Number(vc.ward),
+    regCentre: Number(vc.centre),
   });
-  allVoters.push(
-    ...voters.map((it) => ({
-      ...vc,
-      ...it,
-    }))
-  );
-
-  // Flush all the voters once 10,000.
-  if (allVoters.length >= 10000) {
-    await Bun.write(
-      `./data/voterList${counter}.json`,
-      JSON.stringify(allVoters)
+  for (const v of voters) {
+    appendFileSync(
+      file,
+      `${vc.state},${vc.district},${vc.districtName},${vc.vdc},${vc.vdcName},${vc.ward},${vc.centre},${vc.centreName},${v.voterId},${v.name},${v.age},${v.gender},${v.spouse},${v.parents}\n`
     );
-    counter++;
-    allVoters = [];
   }
 }
-
-// Flush any remaining voters.
-await Bun.write(`./data/voterList${counter}.json`, JSON.stringify(allVoters));
