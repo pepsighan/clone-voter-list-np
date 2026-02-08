@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 
 const indexProcessUrl =
-  "https://voterlist.election.gov.np/bbvrs1/index_process_1.php";
+  "https://voterlist.election.gov.np/index_process.php";
 
 export const regionType = {
   district: "district",

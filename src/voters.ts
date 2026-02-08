@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 
 const voterListUrl =
-  "https://voterlist.election.gov.np/bbvrs1/view_ward_1.php";
+  "https://voterlist.election.gov.np/view_ward.php";
 
 interface FetchVotersArgs {
   state: number;
@@ -34,7 +34,7 @@ export async function fetchVoters({
   const body = await response.text();
   const dom = new JSDOM(body);
   const records = dom.window.document.querySelectorAll(
-    ".div_bbvrs_data > table > tbody > tr"
+    "#tbl_data tbody tr"
   );
 
   const voters: {
