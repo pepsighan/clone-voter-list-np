@@ -1,5 +1,6 @@
 import { appendFileSync, writeFileSync } from "node:fs";
 import { fetchRegion, regionType } from "./region";
+import { runInBatches } from "./batch";
 
 const vdcs = (await Bun.file("./data/vdcs.csv").text())
   .trim()
@@ -19,17 +20,21 @@ const vdcs = (await Bun.file("./data/vdcs.csv").text())
 const file = "./data/wards.csv";
 writeFileSync(file, "state,district,districtName,vdc,vdcName,ward\n");
 
-for (const vdc of vdcs) {
-  console.log("Fetch wards", vdc.vdc);
-
-  const wards = await fetchRegion({
-    vdc: Number(vdc.vdc),
-    list_type: regionType.ward,
-  });
-  for (const it of wards) {
-    appendFileSync(
-      file,
-      `${vdc.state},${vdc.district},${vdc.districtName},${vdc.vdc},${vdc.vdcName},${it.value}\n`
-    );
+await runInBatches(
+  vdcs,
+  (vdc) => {
+    console.log("Fetch wards", vdc.vdc);
+    return fetchRegion({
+      vdc: Number(vdc.vdc),
+      list_type: regionType.ward,
+    });
+  },
+  (vdc, wards) => {
+    for (const it of wards) {
+      appendFileSync(
+        file,
+        `${vdc.state},${vdc.district},${vdc.districtName},${vdc.vdc},${vdc.vdcName},${it.value}\n`
+      );
+    }
   }
-}
+);
